@@ -4,18 +4,39 @@ import type { Industry } from "../types";
 type Step = "industry" | "equipment" | "chatbot";
 
 export const useIndustrySelection = () => {
-  const [selectedIndustry, setSelectedIndustry] = useState<Industry>(null);
+  const [selectedIndustry, setSelectedIndustry] = useState<Industry>(() => {
+    try {
+      const stored = localStorage.getItem("selectedIndustry");
+      if (
+        stored === "dental" ||
+        stored === "vision" ||
+        stored === "veterinarian"
+      ) {
+        return stored as Industry;
+      }
+    } catch (e) {
+      // ignore storage errors
+    }
+    return null;
+  });
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [currentStep, setCurrentStep] = useState<Step>("industry");
   const [selectedEquipment, setSelectedEquipment] = useState<string | null>(
     null
   );
-  const [fadeIn, setFadeIn] = useState(false);
+  const [fadeIn, setFadeIn] = useState(true);
 
   const handleIndustrySelect = (industry: Industry) => {
     setSelectedIndustry(industry);
     setIsTransitioning(true);
     setFadeIn(false);
+
+    try {
+      if (industry) localStorage.setItem("selectedIndustry", industry);
+      else localStorage.removeItem("selectedIndustry");
+    } catch (e) {
+      // ignore storage errors
+    }
 
     setTimeout(() => {
       setCurrentStep("equipment");
@@ -45,6 +66,12 @@ export const useIndustrySelection = () => {
     setSelectedEquipment(null);
     setFadeIn(false);
     setIsTransitioning(false);
+
+    try {
+      localStorage.removeItem("selectedIndustry");
+    } catch (e) {
+      // ignore
+    }
   };
 
   return {

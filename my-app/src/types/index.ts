@@ -32,3 +32,10 @@ export interface EquipmentSectionProps {
 export interface ChatbotPageProps {
   fadeIn: boolean;
 }
+
+export interface Message {
+  id: string;
+  text: string;
+  sender: "bot" | "user";
+  timestamp: Date;
+}

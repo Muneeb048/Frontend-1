@@ -7,7 +7,7 @@ interface Props {
   onClick: () => void;
 }
 
-const IndustryCard: React.FC<Props> = ({ title, icon, selected, onClick }) => {
+const IndustryCard: React.FC<Props> = ({ title, icon, onClick }) => {
   return (
     <div
       onClick={onClick}

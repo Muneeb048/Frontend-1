@@ -12,7 +12,7 @@ const IndustriesSection: React.FC<IndustrySectionProps> = ({
   return (
     <section
       className={`w-full py-4 px-14 transition-opacity duration-500 ${
-        fadeIn ? "opacity-0" : "opacity-100"
+        fadeIn ? "opacity-100" : "opacity-0"
       }`}
     >
       <h3 className="px-16 text-white/80 text-lg mb-8 max-w-4xl mx-auto">

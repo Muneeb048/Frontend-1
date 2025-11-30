@@ -1,4 +1,5 @@
-import React from "react";
+// React import not needed with automatic JSX runtime
+import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import IndustrySection from "./components/IndustriesSection";
 import EquipmentSection from "./components/EquipmentSection";
 import LoadingSpinner from "./components/LoadingSpinner";
@@ -6,12 +7,12 @@ import { useIndustrySelection } from "./hooks/useIndustrySelection";
 import { equipmentByIndustry } from "./data/equipmentData";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
-import ChatbotPage from "./components/ChatbotPage";
+import LandingPage from "./components/LandingPage";
+import ChatPage from "./components/ChatPage";
 
 function App() {
   const {
     selectedIndustry,
-    currentStep,
     isTransitioning,
     selectedEquipment,
     fadeIn,
@@ -20,46 +21,72 @@ function App() {
     handleProceedToChatbot,
   } = useIndustrySelection();
 
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const currentEquipment = selectedIndustry
     ? equipmentByIndustry[selectedIndustry]
     : [];
 
+  const showHeader = !location.pathname.startsWith("/chat");
+
   return (
     <div className="bg-[#010b14] min-h-screen">
-      <Navbar />
+      {showHeader && <Navbar />}
 
-      {/* Only show Hero on industry and equipment steps */}
-      {currentStep !== "chatbot" && <Hero />}
+      {showHeader && <Hero />}
 
-      {/* Main Content */}
       <main className="container mx-auto px-4">
-        {/* Industry Selection */}
-        {currentStep === "industry" && !isTransitioning && (
-          <IndustrySection
-            selectedIndustry={selectedIndustry}
-            onSelectIndustry={handleIndustrySelect}
-            fadeIn={fadeIn}
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <>
+                {isTransitioning && <LoadingSpinner />}
+                {!isTransitioning && (
+                  <IndustrySection
+                    selectedIndustry={selectedIndustry}
+                    onSelectIndustry={(industry) => {
+                      handleIndustrySelect(industry);
+                      navigate("/equipment");
+                    }}
+                    fadeIn={fadeIn}
+                  />
+                )}
+              </>
+            }
           />
-        )}
 
-        {/* Loading State */}
-        {isTransitioning && <LoadingSpinner />}
-
-        {/* Equipment Selection */}
-        {currentStep === "equipment" && !isTransitioning && (
-          <EquipmentSection
-            equipment={currentEquipment}
-            selectedEquipment={selectedEquipment}
-            onSelectEquipment={handleEquipmentSelect}
-            onFindEquipment={handleProceedToChatbot}
-            fadeIn={fadeIn}
+          <Route
+            path="/equipment"
+            element={
+              <>
+                {isTransitioning && <LoadingSpinner />}
+                {!isTransitioning && (
+                  <EquipmentSection
+                    equipment={currentEquipment}
+                    selectedEquipment={selectedEquipment}
+                    onSelectEquipment={(eq) => handleEquipmentSelect(eq)}
+                    onFindEquipment={() => {
+                      handleProceedToChatbot();
+                      navigate("/chat");
+                    }}
+                    fadeIn={fadeIn}
+                  />
+                )}
+              </>
+            }
           />
-        )}
 
-        {/* Chatbot Page */}
-        {currentStep === "chatbot" && !isTransitioning && (
-          <ChatbotPage fadeIn={fadeIn} />
-        )}
+          <Route
+            path="/chat"
+            element={
+              <LandingPage onGetStarted={() => navigate("/chat/room")} />
+            }
+          />
+
+          <Route path="/chat/room" element={<ChatPage />} />
+        </Routes>
       </main>
     </div>
   );
